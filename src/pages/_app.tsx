@@ -11,6 +11,7 @@ const useReadingProgress = () => {
 
   useEffect(() => {
     const updateScrollProgress = () => {
+      // documentElement를 사용하면 body나 html의 높이를 정확히 파악
       const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight
       const scrollTop = document.documentElement.scrollTop
       
@@ -19,10 +20,10 @@ const useReadingProgress = () => {
       setProgress(newProgress)
     }
 
-    // 스크롤 이벤트 리스너 등록
     window.addEventListener("scroll", updateScrollProgress)
+    // 초기에 한 번 실행하여 상태 설정
+    updateScrollProgress(); 
 
-    // 컴포넌트 언마운트 시 리스너 제거
     return () => {
       window.removeEventListener("scroll", updateScrollProgress)
     }
@@ -34,25 +35,45 @@ const useReadingProgress = () => {
 // (2) 진행률 표시줄 컴포넌트
 const ReadingProgressBar = () => {
   const completion = useReadingProgress()
+  const [isDarkTheme, setIsDarkTheme] = useState(false)
 
-  // ⭐️ 핵심 변경: CSS 변수 사용
-  // 테마에 따라 색상이 자동으로 바뀌는 CSS 변수를 사용합니다.
-  // 이 변수가 Indigo11 쉐이드를 나타낸다고 가정합니다.
-  const barColorCSSVar = 'var(--colors-indigo9Dark)' 
+  // ⭐️ 테마 상태를 감지하는 useEffect
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      // <html> 태그의 data-theme 속성을 확인
+      const currentTheme = document.documentElement.getAttribute('data-theme')
+      setIsDarkTheme(currentTheme === 'dark')
+    })
+
+    // <html> 태그의 속성 변경 감시 시작
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+
+    // 컴포넌트 마운트 시 초기 테마 설정
+    const initialTheme = document.documentElement.getAttribute('data-theme')
+    setIsDarkTheme(initialTheme === 'dark')
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
+
+  // ⭐️ 테마에 따라 대비되는 색상 변수를 설정
+  // 라이트 테마(배경 밝음): 진한 남색 계열 변수 사용
+  // 다크 테마(배경 어두움): 밝은 남색 계열 변수 사용
+  // 아래 변수들은 colors.ts에 정의된 Radix UI의 Indigo 계열 변수여야 합니다.
+  const barColorCSSVar = isDarkTheme 
+    ? 'var(--colors-indigo9Dark)' // 다크 모드에서는 밝은 계열 색상을 사용
+    : 'var(--colors-indigo11)'    // 라이트 모드에서는 진한 계열 색상을 사용
   
-  // 만약 테마 전환 시 가장 잘 보이는 대비되는 색상 코드가 있다면 
-  // 다른 변수를 사용하거나, 프로젝트의 메인 색상 변수를 확인해주세요.
-  // 예: var(--color-text-highlight) 등
-
   return (
     <div
       style={{
         position: "fixed", 
-        top: 47,
+        top: "48px", 
         left: 0,
         width: `${completion}%`, 
         height: "4px", 
-        backgroundColor: barColorCSSVar, // (3) CSS 변수 적용
+        backgroundColor: barColorCSSVar, // ⭐️ 테마별 변수 적용
         zIndex: 100, 
         transition: "width 0.1s ease-out", 
       }}
@@ -61,8 +82,8 @@ const ReadingProgressBar = () => {
 }
 
 function App({ Component, pageProps }: AppPropsWithLayout) {
+  // ... (나머지 App 컴포넌트 내용은 동일)
   const getLayout = Component.getLayout || ((page) => page)
-
   const ADSENSE_CLIENT_ID = "ca-pub-3474389046240414"
 
   return (
