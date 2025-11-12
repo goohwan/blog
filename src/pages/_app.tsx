@@ -74,6 +74,7 @@ const ReadingProgressBar = () => {
         width: `${completion}%`, 
         height: "4px", 
         backgroundColor: barColorCSSVar, // ⭐️ 테마별 변수 적용
+        display:inline,
         zIndex: 100, 
         transition: "width 0.1s ease-out", 
       }}
