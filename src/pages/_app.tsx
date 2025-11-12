@@ -38,7 +38,7 @@ const ReadingProgressBar = () => {
   // ⭐️ 핵심 변경: CSS 변수 사용
   // 테마에 따라 색상이 자동으로 바뀌는 CSS 변수를 사용합니다.
   // 이 변수가 Indigo11 쉐이드를 나타낸다고 가정합니다.
-  const barColorCSSVar = 'var(--colors-indigo11)' 
+  const barColorCSSVar = 'var(--colors-indigo9Dark)' 
   
   // 만약 테마 전환 시 가장 잘 보이는 대비되는 색상 코드가 있다면 
   // 다른 변수를 사용하거나, 프로젝트의 메인 색상 변수를 확인해주세요.
@@ -48,7 +48,7 @@ const ReadingProgressBar = () => {
     <div
       style={{
         position: "fixed", 
-        top: 48,
+        top: 47,
         left: 0,
         width: `${completion}%`, 
         height: "4px", 
