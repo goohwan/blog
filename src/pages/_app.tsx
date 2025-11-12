@@ -48,7 +48,7 @@ const ReadingProgressBar = () => {
     <div
       style={{
         position: "fixed", 
-        top: 0,
+        top: 48px,
         left: 0,
         width: `${completion}%`, 
         height: "4px", 
