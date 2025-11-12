@@ -4,9 +4,8 @@ import { RootLayout } from "src/layouts"
 import { queryClient } from "src/libs/react-query"
 import Script from "next/script"
 import { useState, useEffect } from "react" 
-import { useTheme } from "next-themes" // (1) 테마를 가져오기 위해 import 합니다.
 
-// (2) 스크롤 진행률을 계산하는 커스텀 Hook (이전과 동일)
+// (1) 스크롤 진행률을 계산하는 커스텀 Hook (이전과 동일)
 const useReadingProgress = () => {
   const [progress, setProgress] = useState(0)
 
@@ -20,8 +19,10 @@ const useReadingProgress = () => {
       setProgress(newProgress)
     }
 
+    // 스크롤 이벤트 리스너 등록
     window.addEventListener("scroll", updateScrollProgress)
 
+    // 컴포넌트 언마운트 시 리스너 제거
     return () => {
       window.removeEventListener("scroll", updateScrollProgress)
     }
@@ -30,14 +31,18 @@ const useReadingProgress = () => {
   return progress
 }
 
-// (3) 진행률 표시줄 컴포넌트
+// (2) 진행률 표시줄 컴포넌트
 const ReadingProgressBar = () => {
   const completion = useReadingProgress()
-  const { theme } = useTheme() // 현재 테마(light/dark)를 가져옵니다.
 
-  // Radix UI Indigo 색상 팔레트에서 테마에 맞는 색상 쉐이드를 지정합니다.
-  // 이 값은 colors.ts 파일의 Indigo 계열 색상 중 하나여야 합니다.
-  const barColor = theme === 'dark' ? '#9192F8' : '#3E5AFB' // 예: indigo9Dark, indigo11Light에 해당하는 색상 코드를 직접 입력했습니다.
+  // ⭐️ 핵심 변경: CSS 변수 사용
+  // 테마에 따라 색상이 자동으로 바뀌는 CSS 변수를 사용합니다.
+  // 이 변수가 Indigo11 쉐이드를 나타낸다고 가정합니다.
+  const barColorCSSVar = 'var(--colors-indigo11)' 
+  
+  // 만약 테마 전환 시 가장 잘 보이는 대비되는 색상 코드가 있다면 
+  // 다른 변수를 사용하거나, 프로젝트의 메인 색상 변수를 확인해주세요.
+  // 예: var(--color-text-highlight) 등
 
   return (
     <div
@@ -47,7 +52,7 @@ const ReadingProgressBar = () => {
         left: 0,
         width: `${completion}%`, 
         height: "4px", 
-        backgroundColor: barColor, // (4) 테마에 따라 색상 적용
+        backgroundColor: barColorCSSVar, // (3) CSS 변수 적용
         zIndex: 100, 
         transition: "width 0.1s ease-out", 
       }}
