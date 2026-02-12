@@ -19,7 +19,7 @@ export const getPosts = async () => {
   id = idToUuid(id)
 
   // 노션 API 구조 변경: value.value로 접근해야 함
-  const collectionData = Object.values(response.collection)[0]?.value
+  const collectionData = Object.values(response.collection)[0]?.value as any
   const collection = collectionData?.value || collectionData
   const block = response.block
   const schema = collection?.schema
@@ -43,7 +43,7 @@ export const getPosts = async () => {
       const properties = (await getPageProperties(id, block, schema)) || null
       // Add fullwidth, createdtime to properties
       // 노션 API 구조 변경: value.value로 접근해야 함
-      const blockData = block[id]?.value
+      const blockData = block[id]?.value as any
       const blockValue = blockData?.value || blockData
 
       properties.createdTime = new Date(
