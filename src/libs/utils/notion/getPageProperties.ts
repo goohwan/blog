@@ -9,7 +9,10 @@ async function getPageProperties(
   schema: CollectionPropertySchemaMap
 ) {
   const api = new NotionAPI()
-  const rawProperties = Object.entries(block?.[id]?.value?.properties || [])
+  // 노션 API 구조 변경: value.value.properties로 접근해야 함
+  const blockData = block?.[id]?.value
+  const blockValue = blockData?.value || blockData // value.value 또는 value
+  const rawProperties = Object.entries(blockValue?.properties || [])
   const excludeProperties = ["date", "select", "multi_select", "person", "file"]
   const properties: any = {}
   for (let i = 0; i < rawProperties.length; i++) {

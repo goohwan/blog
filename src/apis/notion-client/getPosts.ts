@@ -17,34 +17,45 @@ export const getPosts = async () => {
 
   const response = await api.getPage(id)
   id = idToUuid(id)
-  const collection = Object.values(response.collection)[0]?.value
+
+  // 노션 API 구조 변경: value.value로 접근해야 함
+  const collectionData = Object.values(response.collection)[0]?.value
+  const collection = collectionData?.value || collectionData
   const block = response.block
   const schema = collection?.schema
 
   const rawMetadata = block[id].value
 
-  // Check Type
-  if (
-    rawMetadata?.type !== "collection_view_page" &&
-    rawMetadata?.type !== "collection_view"
-  ) {
+  // Check Type - 노션 정책 변경으로 type이 없을 수 있으므로 collection과 schema 존재 여부로 판단
+  const isValidDatabase = collection && schema && Object.keys(schema).length > 0
+  const isOldTypeDatabase = rawMetadata?.type === "collection_view_page" || rawMetadata?.type === "collection_view"
+
+  if (!isValidDatabase && !isOldTypeDatabase) {
     return []
   } else {
     // Construct Data
     const pageIds = getAllPageIds(response)
+
     const data = []
     for (let i = 0; i < pageIds.length; i++) {
       const id = pageIds[i]
+
       const properties = (await getPageProperties(id, block, schema)) || null
       // Add fullwidth, createdtime to properties
+      // 노션 API 구조 변경: value.value로 접근해야 함
+      const blockData = block[id]?.value
+      const blockValue = blockData?.value || blockData
+
       properties.createdTime = new Date(
-        block[id].value?.created_time
+        blockValue?.created_time
       ).toString()
       properties.fullWidth =
-        (block[id].value?.format as any)?.page_full_width ?? false
+        (blockValue?.format as any)?.page_full_width ?? false
 
       data.push(properties)
     }
+
+
 
     // Sort by date
     data.sort((a: any, b: any) => {
